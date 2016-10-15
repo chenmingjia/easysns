@@ -33,7 +33,11 @@ var server = http.createServer(function(req,res){
 
     var rule = find(rules,function(rule){
     	if(rule.path instanceof RegExp){
-    		return urlInfo.pathname.match(rule.path)
+    		var matchResult = urlInfo.pathname.match(rule.path)
+    		if(matchResult){
+    			req.params = matchResult
+    		}
+    		return matchResult
     	}
     	return rule.path == urlInfo.pathname
     })
@@ -42,7 +46,7 @@ var server = http.createServer(function(req,res){
     controller(req,res)
 		
 	
-   res.end('hello world3')
+   
 })
 
 server.listen(3000)
