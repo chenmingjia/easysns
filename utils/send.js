@@ -20,9 +20,24 @@ exports.sendFile = function(path,res){
 
       var mimeType = mime.lookup(path)
       var charset = mime.charsets.lookup(mimeType)
-      console.log('mimeType',mimeType,'charset',charset)
+
       res.setHeader('Content-Type',mimeType + (charset ? ';charset='+charset : ''))
       res.end(data)
     })
 
+}
+
+
+exports.redirect = function(location,res,statusCode){
+  statusCode = statusCode || 302
+  res.writeHead(statusCode,{
+    location:location
+  })
+  res.end()
+}
+
+exports.sendError = function(err,res){
+  statusCode = statusCode || 500
+  res.writeHead(statusCode)
+  res.end(err.message)
 }
