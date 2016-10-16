@@ -1,6 +1,8 @@
 const qs = require('querystring')
 const parseBody = require('../utils/parseBody')
 const send = require('../utils/send')
+const models = require('../models')
+
 
 exports.login = function(req,res){
    
@@ -9,7 +11,21 @@ exports.login = function(req,res){
           send.sendError(err,res)
       }
 
-   	  send.redirect('/',res)
+      models.user.getByEmail(body.email,function(err,user){
+        if (err) {
+          return send.sendError(err,res)
+        }
+        if(!user){
+          return send.redirect('/?err=no_user',res)
+        }
+        if (body.password !== user.password) {
+          return send.redirect('/?err=invalid_pass',res)
+        }
+
+        send.redirect('/',res)
+      })
+
+   	 
    })
 
 }
@@ -17,13 +33,19 @@ exports.login = function(req,res){
 exports.register = function(req,res){
 
    parseBody(req,function(err,body){
-        var user = {
+      var user = {
     		email:body.email,
     		password:body.password,
     		nickname:body.nickname
     	}
+      
+      models.user.create(user,function(err){
+        if (err) {
+          return send.sendError(err,res)
+        }
 
-   	    send.redirect('/',res)
+        send.redirect('/',res)
+      })   	  
    })
      
 }
