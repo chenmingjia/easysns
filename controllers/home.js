@@ -2,12 +2,13 @@
 const joinPath = require('path').join
 const viewPath = joinPath(__dirname,'../views')
 const sendFile = require('../utils/send').sendFile
+const authorize = require('../middlewares/authorize')
 
-module.exports = function(req,res){
+module.exports = authorize(function(req,res){
     
 
-    var isLogin = false
+    var isLogin = !!req.userId
     var view = isLogin ? 'home.html' : 'welcome.html'
     sendFile(joinPath(viewPath,view),res)
 
-}
+})

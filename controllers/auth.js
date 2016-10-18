@@ -2,6 +2,35 @@ const qs = require('querystring')
 const parseBody = require('../utils/parseBody')
 const send = require('../utils/send')
 const models = require('../models')
+const crypto = require('crypto')
+
+
+
+function generateToken(userId,callback){
+
+  var token = crypto.randomBytes(16).toString('hex')
+  models.token.update(token,userId,function(err){
+    if (err) {
+       return callback(err)
+    }
+    callback(null,token)
+  })
+}
+
+function doLogin(userId,res){
+  generateToken(userId,function(err,token){
+    if(err){
+      return send.sendError(err,res)
+    }
+
+    res.writeHead(302,{
+      'Set-Cookie':'token='+token + '; path=/; HttpOnly',
+      location:'/'
+    })
+    res.end()
+  })
+}
+
 
 
 exports.login = function(req,res){
@@ -22,7 +51,7 @@ exports.login = function(req,res){
           return send.redirect('/?err=invalid_pass',res)
         }
 
-        send.redirect('/',res)
+        doLogin(user.id,res)
       })
 
    	 
@@ -43,8 +72,8 @@ exports.register = function(req,res){
         if (err) {
           return send.sendError(err,res)
         }
-
-        send.redirect('/',res)
+        doLogin(user.id,res)
+        
       })   	  
    })
      
